@@ -34,3 +34,26 @@ io.on('connection', (socket) => {
 server.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+app.get('/admin.html', (req, res) => {
+    const googleMapsApiKey = process.env.GOOGLE_MAPS_API_KEY;
+    res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Admin: Ambulance Tracker</title>
+            <script src="https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}"></script>
+        </head>
+        <body>
+            <h1>Admin: Ambulance Tracker</h1>
+            <div id="map" style="width: 100%; height: 500px;"></div>
+            <script>
+                // Map initialization code here
+            </script>
+        </body>
+        </html>
+    `);
+});
+
