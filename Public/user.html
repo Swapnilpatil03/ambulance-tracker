@@ -36,28 +36,38 @@
     <button id="stop-service" disabled>Stop Service</button>
 
     <script>
-        const socket = io('http://localhost:3000'); // Connect to the backend server
+        const socket = io(); // Connect to the backend server
+        let watchId = null;
 
         const startServiceBtn = document.getElementById('start-service');
         const stopServiceBtn = document.getElementById('stop-service');
 
-        const staticLocation = {
-            lat: 19.076, // Example static location (e.g., Mumbai)
-            lng: 72.8777
-        };
-
         startServiceBtn.addEventListener('click', () => {
-            // Send static location to the server
-            socket.emit('ambulance-location', staticLocation);
+            if (navigator.geolocation) {
+                watchId = navigator.geolocation.watchPosition((position) => {
+                    const location = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    socket.emit('ambulance-location', location); // Send location to the server
+                });
 
-            startServiceBtn.disabled = true;
-            stopServiceBtn.disabled = false;
+                startServiceBtn.disabled = true;
+                stopServiceBtn.disabled = false;
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
         });
 
         stopServiceBtn.addEventListener('click', () => {
-            socket.emit('stop-ambulance'); // Notify server to stop tracking
-            startServiceBtn.disabled = false;
-            stopServiceBtn.disabled = true;
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                socket.emit('stop-ambulance'); // Notify server to stop tracking
+                watchId = null;
+
+                startServiceBtn.disabled = false;
+                stopServiceBtn.disabled = true;
+            }
         });
     </script>
 </body>
