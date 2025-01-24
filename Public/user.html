@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User: Ambulance Service</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+        }
+        button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>User: Ambulance Service</h1>
+    <button id="start-service">Start Service</button>
+    <button id="stop-service" disabled>Stop Service</button>
+
+    <script>
+        const socket = io('http://localhost:3000'); // Connect to the backend server
+
+        const startServiceBtn = document.getElementById('start-service');
+        const stopServiceBtn = document.getElementById('stop-service');
+
+        const staticLocation = {
+            lat: 19.076, // Example static location (e.g., Mumbai)
+            lng: 72.8777
+        };
+
+        startServiceBtn.addEventListener('click', () => {
+            // Send static location to the server
+            socket.emit('ambulance-location', staticLocation);
+
+            startServiceBtn.disabled = true;
+            stopServiceBtn.disabled = false;
+        });
+
+        stopServiceBtn.addEventListener('click', () => {
+            socket.emit('stop-ambulance'); // Notify server to stop tracking
+            startServiceBtn.disabled = false;
+            stopServiceBtn.disabled = true;
+        });
+    </script>
+</body>
+</html>

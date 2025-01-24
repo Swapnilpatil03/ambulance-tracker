@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin: Ambulance Tracker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCdMHEXrshZNMfXZq2t_pdGuONCMfeMYQI"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #map {
+            width: 100vw;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <h1 style="text-align: center; margin: 0; padding: 10px; background: #007BFF; color: white;">
+        Admin: Ambulance Tracker
+    </h1>
+    <div id="map"></div>
+    <script>
+        const socket = io('http://localhost:3000'); // Connect to the backend server
+        let map, ambulanceMarker;
+
+        function initMap() {
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 19.076, lng: 72.8777 }, // Default center (e.g., Mumbai)
+                zoom: 12
+            });
+        }
+
+        socket.on('ambulance-location', (location) => {
+            if (!ambulanceMarker) {
+                ambulanceMarker = new google.maps.Marker({
+                    position: location,
+                    map: map,
+                    icon: {
+                        url: 'https://img.icons8.com/3d-fluency/48/ambulance.png',
+                        scaledSize: new google.maps.Size(50, 50)
+                    }
+                });
+            } else {
+                ambulanceMarker.setPosition(location);
+            }
+            map.setCenter(location);
+        });
+
+        socket.on('stop-ambulance', () => {
+            if (ambulanceMarker) {
+                ambulanceMarker.setMap(null);
+                ambulanceMarker = null;
+            }
+        });
+
+        window.onload = initMap;
+    </script>
+</body>
+</html>
