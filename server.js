@@ -7,6 +7,14 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 app.use(express.static('public')); // Assuming your HTML files are in 'public' directory
+app.get('/admin', (req, res) => {
+    res.sendFile(__dirname + '/public/admin.html');
+});
+
+// Serve user.html
+app.get('/user', (req, res) => {
+    res.sendFile(__dirname + '/public/user.html');
+});
 
 // Handle ambulance location updates
 io.on('connection', (socket) => {
