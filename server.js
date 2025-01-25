@@ -6,14 +6,14 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-app.use(express.static('public')); // Assuming your HTML files are in 'public' directory
+app.use(express.static(path.join(__dirname, 'public'))); // Assuming your HTML files are in 'public' directory
 app.get('/admin', (req, res) => {
-    res.sendFile(__dirname + '/public/admin.html');
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
 // Serve user.html
 app.get('/user', (req, res) => {
-    res.sendFile(__dirname + '/public/user.html');
+    res.sendFile(path.join(__dirname, 'public', 'user.html'));
 });
 
 app.get('/', (req, res) => {
