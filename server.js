@@ -16,6 +16,10 @@ app.get('/user', (req, res) => {
     res.sendFile(__dirname + '/public/user.html');
 });
 
+app.get('/', (req, res) => {
+    res.send('Server is running');
+});
+
 // Handle ambulance location updates
 io.on('connection', (socket) => {
     console.log('A user connected');
