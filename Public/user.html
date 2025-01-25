@@ -36,39 +36,64 @@
     <button id="stop-service" disabled>Stop Service</button>
 
     <script>
-        const socket = io(); // Connect to the backend server
+        const socket = io('http://localhost:3000'); // Connect to the backend server
         let watchId = null;
-
+        let userId = 'unique-user-id'; // Replace this with a dynamic ID for each user
+    
         const startServiceBtn = document.getElementById('start-service');
         const stopServiceBtn = document.getElementById('stop-service');
-
+    
         startServiceBtn.addEventListener('click', () => {
             if (navigator.geolocation) {
-                watchId = navigator.geolocation.watchPosition((position) => {
-                    const location = {
-                        lat: position.coords.latitude,
-                        lng: position.coords.longitude
-                    };
-                    socket.emit('ambulance-location', location); // Send location to the server
-                });
-
+                // Start tracking the user's location
+                watchId = navigator.geolocation.watchPosition(
+                    (position) => {
+                        const location = {
+                            userId,
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+                        // Send the live location to the server
+                        socket.emit('ambulance-location', location);
+                    },
+                    (error) => {
+                        console.error('Error fetching location:', error.message);
+                        alert('Failed to get your location. Please check your GPS settings or allow location access.');
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        maximumAge: 0,
+                        timeout: 5000
+                    }
+                );
+    
                 startServiceBtn.disabled = true;
                 stopServiceBtn.disabled = false;
             } else {
                 alert('Geolocation is not supported by this browser.');
             }
         });
-
+    
         stopServiceBtn.addEventListener('click', () => {
             if (watchId !== null) {
+                // Stop watching the location
                 navigator.geolocation.clearWatch(watchId);
-                socket.emit('stop-ambulance'); // Notify server to stop tracking
+                socket.emit('stop-ambulance', { userId }); // Notify the server to remove the user
                 watchId = null;
-
+    
                 startServiceBtn.disabled = false;
                 stopServiceBtn.disabled = true;
             }
         });
+    
+        // Notify the server when the user closes the browser or tab
+        window.addEventListener('beforeunload', () => {
+            if (watchId !== null) {
+                navigator.geolocation.clearWatch(watchId);
+                socket.emit('stop-ambulance', { userId });
+            }
+        });
     </script>
+    
 </body>
 </html>
